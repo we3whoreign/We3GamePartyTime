@@ -44,7 +44,7 @@ Line.prototype.containsAssumingParallel = function (point) {
 	return containsx && containsy;
 }
 
-Object.defineProperty(Line, "length", {
+Object.defineProperty(Line.prototype, "length", {
 	get: function () {
 		if (!Boolean(this._length)) {
 			this._length = Math.sqrt(Math.pow(this.startPoint.x - this.endPoint.x, 2) + Math.pow(this.startPoint.y - this.endPoint.y,2));
@@ -57,7 +57,7 @@ Object.defineProperty(Line, "length", {
 	}
 });
 
-Object.defineProperty(Line, "slope", {
+Object.defineProperty(Line.prototype, "slope", {
 	get: function () {
 		if (!Boolean(this._slope)) {
 			var y1 = this.startPoint.y,

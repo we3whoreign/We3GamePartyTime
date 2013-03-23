@@ -1,11 +1,11 @@
-Entity = new function (shape) {
+var Entity = function (shape) {
 	//boundingShape is the prototype of some polygon
 	this.shape = shape;
 };
 
 Entity.prototype.center = {
 	x: 0,
-	y: 0;
+	y: 0
 };
 
 Entity.prototype.octogonalDirections = {
@@ -16,7 +16,7 @@ Entity.prototype.octogonalDirections = {
 	NE: 0,
 	SE: 0,
 	SW: 0,
-	NW: 0;
+	NW: 0
 
 };
 
@@ -33,6 +33,7 @@ Entity.prototype._createBoundingShape = function () {
 	// Override 
 };
 
+alert("Test");
 
 Entity.prototype._boundingShape = null;
 Entity.prototype.visible = false;
