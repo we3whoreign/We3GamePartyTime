@@ -23,10 +23,14 @@ Entity.prototype.octogonalDirections = {
 
 Entity.prototype.getBoundingShape = function () {
 	if(!this._boundingShape){
-		this._boundingShape = new this._boundingShape(this);
+		this._boundingShape = this._createBoundingShape();
 	}
 	
 	return this.boundingShape;
+};
+
+Entity.prototype._createBoundingShape = function () {
+	// Override 
 };
 
 

@@ -4,6 +4,40 @@
 <head>
 	<title>We 3 Who Reign Game of The Year: PONG XX Advent Core+ - Armstrong Cannon XL (It's really perfect)</title>
 	<!-- All of the js file inclusion will go here -->
+	
+	<script type="text/javascript">
+		//Loads resource at specified path
+		function loadResource(path){
+			
+			var scripts = document.getElementsByTagName('script');
+			for( var i = 0; i < scripts.length; i++){
+				if (scripts[i].src === path) {
+					// no point in loading stuff twice dawg
+					alert('dumbass loading '+path+ ' twice');
+					return;
+				}
+			}
+			
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = path;
+			
+			document.getElementsByTagName('head')[0].appendChild(script);
+		}
+		
+		var path = "../src/";
+		var filesToLoad = ["Point.js","Line.js","BoundingShape.js","Entity.js"];
+		for (f in filesToLoad){
+			loadResource(f);
+		}
+	</script>
+	<style type="text/css">
+		#gameCanvas {
+			width: 800px;
+			height: 600px;
+			background: black;
+		}
+	</style>
 </head>
 
 <body>
