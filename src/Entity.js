@@ -26,14 +26,12 @@ Entity.prototype.getBoundingShape = function () {
 		this._boundingShape = this._createBoundingShape();
 	}
 	
-	return this.boundingShape;
+	return this._boundingShape;
 };
 
 Entity.prototype._createBoundingShape = function () {
 	// Override 
 };
-
-alert("Test");
 
 Entity.prototype._boundingShape = null;
 Entity.prototype.visible = false;
