@@ -1,6 +1,7 @@
-function Line (point1, point2)	{
+function Line (point1, point2,name)	{
 	this.startPoint = point1;
 	this.endPoint = point2;
+	this.name = name;
 }
 
 Line.prototype.intersects = function (line2) {

@@ -24,13 +24,18 @@ function BoundingRectangle (height, width, centerPoint) {
 	x -= width;
 	var upperLeft = new Point(x,y);
 	
-	this.addLine(new Line(upperRight, upperLeft));
-	this.addLine(new Line(upperRight, lowerRight));
-	this.addLine(new Line(lowerRight, lowerLeft));
-	this.addLine(new Line(upperLeft, lowerLeft));
+	this.addLine(new Line(upperRight, upperLeft, this.TOP));
+	this.addLine(new Line(upperRight, lowerRight, this.RIGHT));
+	this.addLine(new Line(lowerRight, lowerLeft, this.BOTTOM));
+	this.addLine(new Line(upperLeft, lowerLeft, this.LEFT));
 };
 
 BoundingRectangle.prototype.width = 0;
 BoundingRectangle.prototype.height = 0;
+
+BoundingRectangle.prototype.TOP = "TOP";
+BoundingRectangle.prototype.BOTTOM = "BOTTOM";
+BoundingRectangle.prototype.LEFT = "LEFT";
+BoundingRectangle.prototype.RIGHT = "RIGHT";
 
 BoundingRectangle.prototype = new BoundingShape();
