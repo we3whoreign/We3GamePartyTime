@@ -99,9 +99,9 @@ Line.prototype.toString = function () {
 }
 
 Line.prototype.move = function (dx, dy){
-	console("Moving "+this.name + dx + " : " + dy);
-	this.startPoint.moveTo(new Point(this.startPoint.x + dx, this.startPoint.y + dy));
-	this.endPoint.moveTo(new Point(this.endPoint.x + dx, this.endPoint.y + dy));
+	console.log("Moving "+this.name + " "+ dx + " : " + dy);
+	this.startPoint.moveBy(dx,dy);
+	this.endPoint.moveBy(dx,dy);
 }
 
 Object.defineProperty(Line.prototype, "length", {

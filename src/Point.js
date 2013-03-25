@@ -55,11 +55,16 @@ Point.prototype.moveTo = function (point) {
 	
 	// use the private accessor in order to not trigger the listeners twice
 	console.log("Move " + this.toString()+ " to " + point.toString());
-	this.notifyListeners(point.x - this._x, point.y - this._y);
+	this.notifyListeners(point.x - this.x, point.y - this.y);
 	this._x = point.x;
 	this._y = point.y;
 }
 
+Point.prototype.moveBy = function (dx, dy) {
+	this.notifyListeners(dx, dy);
+	this._x += dx;
+	this._y += dy;
+}
 Point.prototype.minus = function (point2) {
 	return new Point(this.x - point2.x, this.y - point2.y);
 }

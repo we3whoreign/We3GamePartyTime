@@ -21,7 +21,13 @@ Object.defineProperty(BoundingShape.prototype, "center", {
 			this._center.moveTo(center);
 		} else {
 			this._center = center;
-			this._center.addListener(this.moveCenter);
+			// Have to bind to this in order to make sure that the function
+			// has all of the properties of the bounding shape. 
+			// Basically, without the binding, in the function call
+			// of this.lines would return undefined because the "this"
+			// refers to the function, not the BoundingShape object that 
+			// has this center.
+			this._center.addListener(this.moveCenter.bind(this));
 		}
 	},
 	enumerable: true
@@ -91,11 +97,7 @@ BoundingShape.prototype.toString = function () {
 }
 
 BoundingShape.prototype.moveCenter = function (dx, dy){
-	console.log(this.lines);
-	console.log("CENTER MOVED " + dx + " : " + dy);
-	console.log(this._lines);
-	console.log(this._center);
 	for(i in this.lines){
-		this.lines[i].move(center.x - this.center.x, center.y - this.center.y);
+		this.lines[i].move(dx, dy);
 	}
 }
