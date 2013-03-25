@@ -9,9 +9,10 @@
 	
 	function init() {
 		var leftPaddle = new Entity(),
-		rightPaddle = new Entity();
+			rightPaddle = new Entity();
 	
 		leftPaddle._createBoundingShape = function () {
+			console.log("Creating boundingRectangle");
 			return new BoundingRectangle(30 /* height */,60 /* width */, this.center);
 		};
 		
@@ -20,17 +21,19 @@
 		};
 		
 		leftPaddle.draw = function () {
-			var bs = this.getBoundingShape();
+			var bs = this.boundingShape;
 			var topLeftX = this.center.x - bs.width*0.5,
 				topLeftY = this.center.y + bs.height*0.5;
-			context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			//context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			bs.draw(context);
 		};
 		
 		rightPaddle.draw = function () {
-			var bs = this.getBoundingShape();
+			var bs = this.boundingShape;
 			var topLeftX = this.center.x - bs.width*0.5,
 				topLeftY = this.center.y + bs.height*0.5;
-			context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			//context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			bs.draw(context);
 		};
 		
 		leftPaddle.image = new Image();
@@ -85,26 +88,39 @@
 		});
 		
 		elements["leftPaddle"] = leftPaddle;
+		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
+		//console.log("Adding to elements: \n"+rightPaddle.toString());
 	}
 	
 	function update(){
 		var paddle = elements["leftPaddle"],
-			speed = 2;
-		if(paddle.keysPressed.Left){
-			paddle.center.x -= speed;
-		} 
-		
-		if(paddle.keysPressed.Right){
-			paddle.center.x += speed;
-		}
-		
-		if(paddle.keysPressed.Up){
-			paddle.center.y -= speed;
-		} 
-		
-		if(paddle.keysPressed.Down){
-			paddle.center.y += speed;
+			prinny = elements["rightPaddle"],
+			speed = 2,
+			collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
+
+		//console.log(collision.status);
+		if (collision.status === "apart"){
+			if(paddle.keysPressed.Left){
+				paddle.center.x -= speed;
+			} 
+			
+			if(paddle.keysPressed.Right){
+				paddle.center.x += speed;
+			}
+			
+			if(paddle.keysPressed.Up){
+				paddle.center.y -= speed;
+			} 
+			
+			if(paddle.keysPressed.Down){
+				paddle.center.y += speed;
+			}
+			// make sure to trigger the center change
+			paddle.center = new Point(paddle.center.x, paddle.center.y);
+		} else if(collision.status === "colliding"){
+			console.log(collision);
+			console.log(collision.myLine.name + ":"+collision.myLine.status.status);
 		}
 	}
 	
@@ -124,5 +140,4 @@
 	
 	init();
 	window.setInterval(gameLoop, 1000/fps);
-
 })();
