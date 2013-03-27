@@ -28,9 +28,9 @@ function BoundingRectangle (height, width, centerPoint) {
 	
 	
 	
-	this.addLine(this.makeLine(upperRight, upperLeft, BoundingRectangle.TOP));
+	this.addLine(this.makeLine(upperRight, upperLeft, BoundingRectangle.BOTTOM));
 	this.addLine(this.makeLine(upperRight, lowerRight, BoundingRectangle.RIGHT));
-	this.addLine(this.makeLine(lowerRight, lowerLeft, BoundingRectangle.BOTTOM));
+	this.addLine(this.makeLine(lowerRight, lowerLeft, BoundingRectangle.TOP));
 	this.addLine(this.makeLine(upperLeft, lowerLeft, BoundingRectangle.LEFT));
 };
 BoundingRectangle.prototype = new BoundingShape();

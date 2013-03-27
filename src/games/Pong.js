@@ -4,7 +4,7 @@
 	canvas.width = 800;
 	canvas.height = 600;
 	var	context = canvas.getContext('2d'),
-		fps = 30,
+		fps = 120,
 		elements = [];
 	
 	function init() {
@@ -103,7 +103,7 @@
 
 		var dP = paddle.center;
 
-		if (collision.status === "apart"){
+		if (collision.status === "apart" || collision.status === "inside"){
 			//var dP = new Point(paddle.center.x,paddle.center.y);
 			if(paddle.keysPressed.Left){
 				dP.x -= speed;
@@ -121,27 +121,32 @@
 				dP.y += speed;
 			}
 		} else if(collision.status === "colliding"){
+			var boom = "";
+			
+			for(var i = 0; i < collision.collisions.length; i++){
+				boom += collision.collisions[i].myLine + " ";
+			}
+			
 			if(paddle.keysPressed.Left){
-				console.log(paddle.boundingShape.toString());
-				if(collision.collisions.indexOf("LEFT") == -1){
+				if(boom.indexOf("LEFT") == -1){
 					dP.x -= speed;
 				}
 			}
 			
 			if(paddle.keysPressed.Right){
-				if(collision.collisions.indexOf("RIGHT") == -1){
+				if(boom.indexOf("RIGHT") == -1){
 					dP.x += speed;
 				}
 			}
 			
 			if(paddle.keysPressed.Up){
-				if(collision.collisions.indexOf("TOP") == -1){
+				if(boom.indexOf("TOP") == -1){
 					dP.y -= speed;
 				}
 			} 
 			
 			if(paddle.keysPressed.Down){
-				if(collision.collisions.indexOf("BOTTOM") == -1){
+				if(boom.indexOf("BOTTOM") == -1){
 					dP.y += speed;
 				}
 			}

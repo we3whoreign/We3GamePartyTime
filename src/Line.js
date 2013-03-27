@@ -106,10 +106,8 @@ Line.prototype.toString = function () {
 }
 
 Line.prototype.move = function (dx, dy){
-	console.log("Moving "+this.name + " "+ dx + " : " + dy);
 	this.startPoint.moveBy(dx,dy);
 	this.endPoint.moveBy(dx,dy);
-	console.log(this.toString());
 }
 
 Line.prototype.draw = function(context, color){
