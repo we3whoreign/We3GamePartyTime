@@ -10,6 +10,7 @@
 	function init() {
 		var leftPaddle = new Entity(),
 			rightPaddle = new Entity();
+		
 	
 		leftPaddle._createBoundingShape = function () {
 			console.log("Creating boundingRectangle");
@@ -99,25 +100,27 @@
 			speed = 2,
 			collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
 
-		//console.log(collision.status);
 		if (collision.status === "apart"){
+			//var dP = new Point(paddle.center.x,paddle.center.y);
+			var dP = paddle.center;
 			if(paddle.keysPressed.Left){
-				paddle.center.x -= speed;
+				console.log(paddle.boundingShape.toString());
+				dP.x -= speed;
 			} 
 			
 			if(paddle.keysPressed.Right){
-				paddle.center.x += speed;
+				dP.x += speed;
 			}
 			
 			if(paddle.keysPressed.Up){
-				paddle.center.y -= speed;
+				dP.y -= speed;
 			} 
 			
 			if(paddle.keysPressed.Down){
-				paddle.center.y += speed;
+				dP.y += speed;
 			}
 			// make sure to trigger the center change
-			paddle.center = new Point(paddle.center.x, paddle.center.y);
+			//paddle.center = dP;
 		} else if(collision.status === "colliding"){
 			console.log(collision);
 			console.log(collision.myLine.name + ":"+collision.myLine.status.status);
@@ -125,9 +128,11 @@
 	}
 	
 	function draw() {
+		var liney = new Line(elements["leftPaddle"].center, elements["rightPaddle"].center);
 		// repaint the canvas to clear it
 		context.fillStyle = "#000000";
 		context.fillRect(0,0,canvas.width, canvas.height);
+		liney.draw(context);
 		for(i in elements){
 			elements[i].draw();
 		}
