@@ -6,7 +6,7 @@ function Line (point1, point2,name)	{
 
 /* Line.prototype.intersectsDetailed = function (line2) {
 	if (line2.slope === this.slope){
-		if (this.containsAssumingParallel(line2.startPoint) || this.containsAssumingParallel(line2.endPoint)){
+		if (this.contains(line2.startPoint) || this.contains(line2.endPoint)){
 			this.status = { status: "parallel intersecting" };
 		} else {
 			this.status = { status: "parallel" };
@@ -41,7 +41,7 @@ function Line (point1, point2,name)	{
 
 Line.prototype.intersects = function (line){
 	if (line.slope === this.slope){
-		if (this.containsAssumingParallel(line.startPoint) || this.containsAssumingParallel(line.endPoint)){
+		if (this.contains(line.startPoint) || this.contains(line.endPoint)){
 			this.status = { status: "parallel intersecting",
 							otherLine: line};
 			return true;
@@ -55,17 +55,21 @@ Line.prototype.intersects = function (line){
 	// the idea being that this.determinant(line.startPoint) gives us a relative indication of the side to which 
 	// the point is on. That means that this.determinant(line.endPoint) must be a different sign in order to indicate
 	// that they are on opposite sides of the line segment. This must also be true for the line we're comparing to
-	// and our own start and end poitns.
+	// and our own start and end points.
 	var det1 = this.determinant(line.startPoint),
 		det2 = this.determinant(line.endPoint),
 		det3 = line.determinant(this.startPoint),
 		det4 = line.determinant(this.endPoint);
-	//console.log(det1 + " : " +det2);
 	
 	if((det1 * det2 < 0) && (det3*det4 < 0)){
 		this.status = { status: "intersect" };
 		return true;
 	} else {
+		// check if the line contains any of the endpoints
+		if( this.contains(line.startPoint) || this.contains(line.endPoint) || line.contains(this.startPoint) || line.contains(this.endPoint)){
+			this.status = { status: "intersect" };
+			return true;
+		}
 		this.status = { status: "not intersecting"};
 		return false;
 	}
@@ -76,7 +80,8 @@ Line.prototype.equals = function (line){
 		|| ((this.startPoint.equals(line.endPoint)) && (this.endPoint.equals(line.startPoint)));
 }
 
-Line.prototype.containsAssumingParallel = function (point) {
+Line.prototype.contains = function (point) {
+	// max amount of work: 12 subtractions, 3 divisions, 6 square roots, 6 multiplications
 	var l1 = new Line(this.startPoint, point),
 		l2 = new Line(this.endPoint, point);
 	
@@ -91,6 +96,8 @@ Line.prototype.determinant = function (point) {
 	// | point.x  point.y  1 |
 	var sp = this.startPoint,
 		ep = this.endPoint;
+	
+	// uses 4 multiplications, 4 subtractions, and 1 addition
 	return sp.x * (ep.y - point.y) - sp.y * (ep.x - point.x) + 1 * (ep.x*point.y - point.x * ep.y);
 }
 
@@ -102,6 +109,30 @@ Line.prototype.move = function (dx, dy){
 	console.log("Moving "+this.name + " "+ dx + " : " + dy);
 	this.startPoint.moveBy(dx,dy);
 	this.endPoint.moveBy(dx,dy);
+	console.log(this.toString());
+}
+
+Line.prototype.draw = function(context, color){
+	 if(!Boolean(context)){
+		throw "Line.draw requires a context to be passed in";
+	 }
+	 
+	 if(!Boolean(color)){
+		// default to white
+		color = "#FFFFFF";
+	 }
+	 
+	 context.save();
+	 context.strokeStyle = color;
+	 context.beginPath();
+	 
+	 context.moveTo(this.startPoint.x, this.startPoint.y);
+	 context.lineTo(this.endPoint.x, this.endPoint.y);
+	 
+	 context.closePath();
+	 context.stroke();
+	 context.restore();
+
 }
 
 Object.defineProperty(Line.prototype, "length", {

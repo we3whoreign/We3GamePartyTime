@@ -100,9 +100,11 @@
 			speed = 2,
 			collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
 
+
 		var dP = paddle.center;
 
 		if (collision.status === "apart"){
+			//var dP = new Point(paddle.center.x,paddle.center.y);
 			if(paddle.keysPressed.Left){
 				dP.x -= speed;
 			} 

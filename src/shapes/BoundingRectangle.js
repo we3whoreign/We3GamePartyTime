@@ -26,12 +26,18 @@ function BoundingRectangle (height, width, centerPoint) {
 	var upperLeft = new Point(x,y);
 	//console.log("upper left = "+upperLeft.toString());
 	
-	this.addLine(new Line(upperRight, upperLeft, BoundingRectangle.TOP));
-	this.addLine(new Line(upperRight, lowerRight, BoundingRectangle.RIGHT));
-	this.addLine(new Line(lowerRight, lowerLeft, BoundingRectangle.BOTTOM));
-	this.addLine(new Line(upperLeft, lowerLeft, BoundingRectangle.LEFT));
+	
+	
+	this.addLine(this.makeLine(upperRight, upperLeft, BoundingRectangle.TOP));
+	this.addLine(this.makeLine(upperRight, lowerRight, BoundingRectangle.RIGHT));
+	this.addLine(this.makeLine(lowerRight, lowerLeft, BoundingRectangle.BOTTOM));
+	this.addLine(this.makeLine(upperLeft, lowerLeft, BoundingRectangle.LEFT));
 };
 BoundingRectangle.prototype = new BoundingShape();
+
+BoundingRectangle.prototype.makeLine = function(p1, p2, name){
+	return new Line(new Point(p1.x, p1.y), new Point(p2.x, p2.y), name);
+}
 
 BoundingRectangle.prototype.draw = function (context, color) {
 	if(!Boolean(context)){

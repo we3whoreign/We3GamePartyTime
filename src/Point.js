@@ -6,6 +6,7 @@ function Point (x,y){
 Object.defineProperty(Point.prototype, "x", {
 	get: function () { return this._x },
 	set: function (x) {
+		console.log("X CHANGING TO "+x);
 		this.notifyListeners(x-this._x , 0);
 		this._x = x;
 	}
@@ -14,7 +15,9 @@ Object.defineProperty(Point.prototype, "x", {
 Object.defineProperty(Point.prototype, "y", {
 	get: function() { return this._y },
 	set: function (y) {
+		console.log("Y CHANGING TO "+y);
 		this.notifyListeners(0, y - this._y);
+		this._y = y;
 	}
 });
 
@@ -52,6 +55,7 @@ Point.prototype.moveTo = function (point) {
 	if(this.equals(point)){
 		return;
 	}
+	console.log("MOVE TO FUNCTION");
 	
 	// use the private accessor in order to not trigger the listeners twice
 	console.log("Move " + this.toString()+ " to " + point.toString());
