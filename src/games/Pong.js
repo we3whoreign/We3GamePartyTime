@@ -10,6 +10,7 @@
 	function init() {
 		var leftPaddle = new Entity(),
 			rightPaddle = new Entity();
+		
 	
 		leftPaddle._createBoundingShape = function () {
 			console.log("Creating boundingRectangle");
@@ -99,35 +100,59 @@
 			speed = 2,
 			collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
 
-		//console.log(collision.status);
+		var dP = paddle.center;
+
 		if (collision.status === "apart"){
 			if(paddle.keysPressed.Left){
-				paddle.center.x -= speed;
+				dP.x -= speed;
 			} 
 			
 			if(paddle.keysPressed.Right){
-				paddle.center.x += speed;
+				dP.x += speed;
 			}
 			
 			if(paddle.keysPressed.Up){
-				paddle.center.y -= speed;
+				dP.y -= speed;
 			} 
 			
 			if(paddle.keysPressed.Down){
-				paddle.center.y += speed;
+				dP.y += speed;
 			}
-			// make sure to trigger the center change
-			paddle.center = new Point(paddle.center.x, paddle.center.y);
 		} else if(collision.status === "colliding"){
-			console.log(collision);
-			console.log(collision.myLine.name + ":"+collision.myLine.status.status);
+			if(paddle.keysPressed.Left){
+				console.log(paddle.boundingShape.toString());
+				if(collision.collisions.indexOf("LEFT") == -1){
+					dP.x -= speed;
+				}
+			}
+			
+			if(paddle.keysPressed.Right){
+				if(collision.collisions.indexOf("RIGHT") == -1){
+					dP.x += speed;
+				}
+			}
+			
+			if(paddle.keysPressed.Up){
+				if(collision.collisions.indexOf("TOP") == -1){
+					dP.y -= speed;
+				}
+			} 
+			
+			if(paddle.keysPressed.Down){
+				if(collision.collisions.indexOf("BOTTOM") == -1){
+					dP.y += speed;
+				}
+			}
+
 		}
 	}
 	
 	function draw() {
+		var liney = new Line(elements["leftPaddle"].center, elements["rightPaddle"].center);
 		// repaint the canvas to clear it
 		context.fillStyle = "#000000";
 		context.fillRect(0,0,canvas.width, canvas.height);
+		liney.draw(context);
 		for(i in elements){
 			elements[i].draw();
 		}

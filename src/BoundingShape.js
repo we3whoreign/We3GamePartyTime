@@ -36,7 +36,7 @@ Object.defineProperty(BoundingShape.prototype, "center", {
 Object.defineProperty(BoundingShape.prototype, "lines", {
 	get: function() {
 		if(!Boolean(this._lines)){
-			this._lines = [];
+			this._lines = {};
 		}
 		return this._lines;
 	},
@@ -47,30 +47,37 @@ Object.defineProperty(BoundingShape.prototype, "lines", {
 
 BoundingShape.prototype.collidesWith = function (boundingShape2){
 	var george = this.lines,
-		cody = boundingShape2.lines;
+		cody = boundingShape2.lines,
+		god = [];
 	
 	//console.log("Comparing this shape: \n"+this.toString() + " and the passed in shape \n"+boundingShape2.toString());
 	// Check if the bounding lines collide,
 	// and return which lines collide if so
-	for( var i = 0; i < george.length; i++){
-		for ( var j = 0; j < cody.length; j++){
+	for( i in george){
+		for ( j in cody){
 			//console.log("Comparing our "+george[i].toString() +" and their "+cody[j].toString());
 			if(george[i].intersects(cody[j])){
 				//console.log(george[i].toString() + " : " + cody[j].toString());
-				return { 
-					myLine: george[i], 
-					otherLine: cody[j],
-					status: "colliding"
-				};
+				god.push({ 
+					myLine: george[i].name, 
+					otherLine: cody[j].name,
+				});
 			}
 		}
+	}
+	
+	if(god.length > 0){
+		return {
+		status: "colliding",
+		collisions: god
+		};
 	}
 	
 	// Check 
 	var romance = new Line(this.center, boundingShape2.center);
 	
 	var isInside = true;
-	for( var i = 0; i < george.length; i++) {
+	for( i in george) {
 		//console.log("Comparing our "+ george[i].toString() + " and " + romance.toString());
 		if(romance.intersects(george[i])){
 			isInside = false;
@@ -87,7 +94,7 @@ BoundingShape.prototype.collidesWith = function (boundingShape2){
 };
 
 BoundingShape.prototype.addLine = function (line){
-	this.lines.push(line);
+	this.lines[line.name] = line;
 }
 
 BoundingShape.prototype.draw = function () { };
