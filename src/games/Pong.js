@@ -5,11 +5,13 @@
 	canvas.height = 600;
 	var	context = canvas.getContext('2d'),
 		fps = 120,
-		elements = [];
+		elements = [],
+		npc = [];
 	
 	function init() {
 		var leftPaddle = new Entity(),
-			rightPaddle = new Entity();
+			rightPaddle = new Entity(),
+			stage = new Entity();
 		
 	
 		leftPaddle._createBoundingShape = function () {
@@ -21,21 +23,27 @@
 			return new BoundingRectangle(30 /* height */,60 /* width */, this.center);
 		};
 		
+		stage._createBoundingShape = function () {
+			return new BoundingRectangle(canvas.height, canvas.width, this.center);
+		};
+		
 		leftPaddle.draw = function () {
 			var bs = this.boundingShape;
 			var topLeftX = this.center.x - bs.width*0.5,
-				topLeftY = this.center.y + bs.height*0.5;
-			//context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
-			bs.draw(context);
+				topLeftY = this.center.y - bs.height*0.5;
+			context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			//bs.draw(context);
 		};
 		
 		rightPaddle.draw = function () {
 			var bs = this.boundingShape;
 			var topLeftX = this.center.x - bs.width*0.5,
-				topLeftY = this.center.y + bs.height*0.5;
-			//context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
-			bs.draw(context);
+				topLeftY = this.center.y - bs.height*0.5;
+			context.drawImage(this.image, topLeftX, topLeftY, bs.width, bs.height);
+			//bs.draw(context);
 		};
+		
+		stage.draw = function () { };
 		
 		leftPaddle.image = new Image();
 		leftPaddle.image.src = "../lib/images/leftpaddle.png";
@@ -44,6 +52,7 @@
 		
 		leftPaddle.center = new Point(50,50);
 		rightPaddle.center = new Point(100,100);
+		stage.center = new Point(canvas.width/2, canvas.height/2);
 		
 		leftPaddle.keysPressed = {
 			Left: false,
@@ -91,19 +100,45 @@
 		elements["leftPaddle"] = leftPaddle;
 		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
+		
+		// NPC List of collidable objects
+		npc.push(rightPaddle.boundingShape);
+		npc.push(stage.boundingShape);
 		//console.log("Adding to elements: \n"+rightPaddle.toString());
 	}
 	
 	function update(){
 		var paddle = elements["leftPaddle"],
 			prinny = elements["rightPaddle"],
-			speed = 2,
-			collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
-
+			speed = 3;
+			//collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
 
 		var dP = paddle.center;
 
-		if (collision.status === "apart" || collision.status === "inside"){
+					
+		if(paddle.keysPressed.Left) {
+			if(!paddle.boundingShape.preemptiveCollidesWith(npc, new Point(-speed,0))){
+				dP.x -= speed;
+			}
+		}
+		if(paddle.keysPressed.Right) {
+			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(speed,0))){
+				dP.x += speed;
+			}
+		}
+		if(paddle.keysPressed.Up) {
+			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,-speed))){
+				dP.y -= speed;
+			}
+		}
+		if(paddle.keysPressed.Down) {
+			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,speed))){
+				dP.y += speed;
+			}
+		}
+		
+
+		/*if (collision.status === "apart" || collision.status === "inside"){
 			//var dP = new Point(paddle.center.x,paddle.center.y);
 			if(paddle.keysPressed.Left){
 				dP.x -= speed;
@@ -151,15 +186,15 @@
 				}
 			}
 
-		}
+		}*/
 	}
 	
 	function draw() {
-		var liney = new Line(elements["leftPaddle"].center, elements["rightPaddle"].center);
+		//var liney = new Line(elements["leftPaddle"].center, elements["rightPaddle"].center);
 		// repaint the canvas to clear it
 		context.fillStyle = "#000000";
 		context.fillRect(0,0,canvas.width, canvas.height);
-		liney.draw(context);
+		//liney.draw(context);
 		for(i in elements){
 			elements[i].draw();
 		}

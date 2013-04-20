@@ -10,7 +10,7 @@ function BoundingRectangle (height, width, centerPoint) {
 	//console.log("Making bounding rectangle with center "+centerPoint.toString());
 	// Lower left corner
 	x = centerPoint.x - 0.5*width;
-	y = centerPoint.y - 0.5*height;
+	y = centerPoint.y + 0.5*height;
 	var lowerLeft = new Point(x,y);
 	//console.log("lower left = "+lowerLeft.toString());
 	// Lower right corner
@@ -18,7 +18,7 @@ function BoundingRectangle (height, width, centerPoint) {
 	var lowerRight = new Point(x,y);
 	//console.log("lower right = "+lowerRight.toString());
 	// Upper right corner
-	y += height;
+	y -= height;
 	var upperRight = new Point(x,y);
 	//console.log("upper right = "+upperRight.toString());
 	// Upper left corner
@@ -28,9 +28,9 @@ function BoundingRectangle (height, width, centerPoint) {
 	
 	
 	
-	this.addLine(this.makeLine(upperRight, upperLeft, BoundingRectangle.BOTTOM));
+	this.addLine(this.makeLine(upperRight, upperLeft, BoundingRectangle.TOP));
 	this.addLine(this.makeLine(upperRight, lowerRight, BoundingRectangle.RIGHT));
-	this.addLine(this.makeLine(lowerRight, lowerLeft, BoundingRectangle.TOP));
+	this.addLine(this.makeLine(lowerRight, lowerLeft, BoundingRectangle.BOTTOM));
 	this.addLine(this.makeLine(upperLeft, lowerLeft, BoundingRectangle.LEFT));
 };
 BoundingRectangle.prototype = new BoundingShape();
@@ -70,6 +70,10 @@ BoundingRectangle.prototype.toString = function () {
 	}
 	
 	return string;
+}
+
+BoundingRectangle.prototype.newClone = function (point) {
+	return new BoundingRectangle(this.height, this.width, point);
 }
 
 Object.defineProperty(BoundingRectangle.prototype, "width", {
