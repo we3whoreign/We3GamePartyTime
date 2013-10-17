@@ -67,9 +67,14 @@ Point.prototype.moveBy = function (dx, dy) {
 	this._x += dx;
 	this._y += dy;
 }
+
+Point.prototype.moveByVector = function (dP) {
+    this.moveBy(dP.x, dP.y);
+};
+
 Point.prototype.minus = function (point2) {
 	return new Point(this.x - point2.x, this.y - point2.y);
-}
+};
 
 Point.prototype.add = function (point2) {
 	return new Point(this.x + point2.x, this.y + point2.y);
@@ -85,4 +90,12 @@ Point.prototype.equals = function(point){
 
 Point.prototype.toString = function () {
 	return "("+this.x+", "+this.y+")";
+}
+
+Point.prototype.multiplyScalar = function (scalar) {
+    return new Point(scalar*this._x, scalar*this._y);
+}
+
+Point.prototype.clone = function () {
+    return new Point(this.x, this.y);
 }

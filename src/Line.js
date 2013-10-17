@@ -39,8 +39,8 @@ function Line (point1, point2,name)	{
 	return this.status;
 } */
 
-Line.prototype.intersects = function (line){
-	if (line.slope === this.slope){
+Line.prototype._basicIntersect = function (line) {
+    if (line.slope === this.slope){
 		if (this.contains(line.startPoint) || this.contains(line.endPoint)){
 			this.status = { status: "parallel intersecting",
 							otherLine: line};
@@ -73,7 +73,43 @@ Line.prototype.intersects = function (line){
 		this.status = { status: "not intersecting"};
 		return false;
 	}
-}
+
+};
+
+Line.prototype._pointIntersect = function (line) {
+    var a1 = this.startPoint,
+           a2 = this.endPoint,
+           b1 = line.startPoint,
+           b2 = line.endPoint;
+           
+    var denom = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * ( a2.y - a1.y);
+    
+    if (denom == 0) {
+        this.status = { status: "not intersecting" };
+        return false;
+    }
+    
+    // uA represents what ratio of the line the point is on.
+    // The point can be found by startPoint + uA*(endPoint - startPoint)
+    var uA = ((b2.x - b1.x) * ( a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x))/denom;
+    var uB = ((a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y)*(a1.x - b1.x))/denom;
+    
+    this.status = { status: "intersect",
+                            point: a1.add(a1.minus(a2).multiplyScalar(uA)) };
+                            
+    line.status = { status: "intersect",
+                            point: b1.add(b1.minus(b2).multiplyScalar(uB)) };
+                            
+    return true;
+};
+
+Line.prototype.intersects = function (line){
+    if (window.Settings.pointCollision) {
+        return this._pointIntersect(line);
+    } else {
+        return this._basicIntersect(line);
+    }
+};
 
 Line.prototype.equals = function (line){
 	return ((this.startPoint.equals(line.startPoint)) && (this.endPoint.equals(line.endPoint))) 

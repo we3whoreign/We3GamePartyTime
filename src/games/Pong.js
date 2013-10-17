@@ -100,7 +100,8 @@
 		elements["leftPaddle"] = leftPaddle;
 		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
-		
+		elements["stage"] = stage;
+        
 		// NPC List of collidable objects
 		npc.push(rightPaddle.boundingShape);
 		npc.push(stage.boundingShape);
@@ -110,32 +111,50 @@
 	function update(){
 		var paddle = elements["leftPaddle"],
 			prinny = elements["rightPaddle"],
+            stage = elements["stage"],
 			speed = 3;
 			//collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
+            
+         
+         // Move the prinny first
+         if(!prinny.speed) {
+            prinny.speed = 1;
+         }
+         
+         if(prinny.boundingShape.preemptiveCollidesWith( [stage.boundingShape, paddle.boundingShape], new Point(prinny.speed, 0))) {
+            prinny.speed = -1 * prinny.speed;
+            if(prinny.boundingShape.preemptiveCollidesWith( [stage.boundingShape, paddle.boundingShape], new Point(prinny.speed, 0))) {
+                prinny.speed = 0;
+            }
+         }
 
-		var dP = paddle.center;
+         prinny.center.moveBy(prinny.speed, 0);
+         
+		var dP = new Point(0,0);
 
 					
 		if(paddle.keysPressed.Left) {
-			if(!paddle.boundingShape.preemptiveCollidesWith(npc, new Point(-speed,0))){
-				dP.x -= speed;
-			}
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(-speed, 0 ))) {
+                dP.x -= speed;
+            }
 		}
 		if(paddle.keysPressed.Right) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(speed,0))){
-				dP.x += speed;
-			}
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(speed, 0 ))) {
+                dP.x += speed;
+            }
 		}
 		if(paddle.keysPressed.Up) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,-speed))){
-				dP.y -= speed;
-			}
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, -speed ))) {
+                dP.y -= speed;
+            }
 		}
 		if(paddle.keysPressed.Down) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,speed))){
-				dP.y += speed;
-			}
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, speed ))) {
+                dP.y += speed;
+            }
 		}
+        
+        paddle.center.moveByVector(dP);
 		
 
 		/*if (collision.status === "apart" || collision.status === "inside"){
