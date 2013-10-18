@@ -94,20 +94,26 @@ BoundingShape.prototype.collidesWith = function (boundingShape2){
 };
 
 BoundingShape.prototype.preemptiveCollidesWith = function (boundingShapes, delta){
-	//Create clone of shape which accounts for shapes next movement
+	// Create clone of shape which accounts for shapes next movement
 	var george = this.newClone(new Point(this.center.x+delta.x, this.center.y+delta.y)),
 	status = false;
 	
-	//Loop through given list
+	// Loop through given list
 	boundingShapes.forEach(function (cody) {
 		//Check if it collides with cody's hot body
 		if(george.collidesWith(cody).status === "colliding"){
-			//If it does, return true
-			status = cody; //cuntbunkers be returning
+			// If it does, make the status cody
+			
+			// cuntbunkers be returning
+			if(!status) {
+				status = [cody];
+			} else {
+				status.push(cody);
+			}
 		}
 	});
 
-	//No collisions, return false
+	//Return proper status
 	return status;
 };
 
