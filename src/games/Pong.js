@@ -11,21 +11,32 @@
 	function init() {
 		var leftPaddle = new Entity(),
 			rightPaddle = new Entity(),
-			stage = new Entity();
+			stage = new Entity(),
+			ball = new Entity();
+			wallOfJustice = new Entity();
+		
+		ball.velocity = new Point(-1,0);
 		
 	
 		leftPaddle._createBoundingShape = function () {
-			console.log("Creating boundingRectangle");
-			return new BoundingRectangle(30 /* height */,60 /* width */, this.center);
+			return new BoundingRectangle(30 /* height */,60 /* width */, new Point(40, canvas.height/2 - 15));
 		};
 		
 		rightPaddle._createBoundingShape = function () {
-			return new BoundingRectangle(30 /* height */,60 /* width */, this.center);
+			return new BoundingRectangle(30 /* height */,60 /* width */, new Point(canvas.width - 40, canvas.height/2  - 15));
 		};
 		
 		stage._createBoundingShape = function () {
 			return new BoundingRectangle(canvas.height, canvas.width, this.center);
 		};
+		
+		ball._createBoundingShape = function () {
+			return new BoundingRectangle(15,15, this.center);
+		};
+		
+		wallOfJustice._createBoundingShape = function() {
+			return new BoundingRectangle(canvas.height, 5, this.center);
+		}
 		
 		leftPaddle.draw = function () {
 			var bs = this.boundingShape;
@@ -45,6 +56,24 @@
 		
 		stage.draw = function () { };
 		
+		ball.draw = function () {
+			var bs = this.boundingShape;
+			var topLeftX = this.center.x - bs.width*0.5,
+				topLeftY = this.center.y - bs.height*0.5;
+				
+			context.fillStyle = '#ffffff';
+			context.fillRect(topLeftX, topLeftY, bs.width, bs.height);
+		};
+		
+		wallOfJustice.draw = function(){
+			var bs = this.boundingShape;
+			var topLeftX = this.center.x - bs.width*0.5,
+				topLeftY = this.center.y - bs.height*0.5;
+				
+			context.fillStyle = '#ffffff';
+			context.fillRect(topLeftX, topLeftY, bs.width, bs.height);
+		}
+		
 		leftPaddle.image = new Image();
 		leftPaddle.image.src = "../lib/images/leftpaddle.png";
 		rightPaddle.image = new Image();
@@ -53,6 +82,8 @@
 		leftPaddle.center = new Point(50,50);
 		rightPaddle.center = new Point(100,100);
 		stage.center = new Point(canvas.width/2, canvas.height/2);
+		ball.center = new Point(stage.center.x, stage.center.y);
+		wallOfJustice.center = new Point(stage.center.x, stage.center.y);
 		
 		leftPaddle.keysPressed = {
 			Left: false,
@@ -100,10 +131,15 @@
 		elements["leftPaddle"] = leftPaddle;
 		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
+		elements["ball"] = ball;
+		elements["wallOfJuster"] = wallOfJustice;
+		elements["stage"] = stage; 
 		
 		// NPC List of collidable objects
 		npc.push(rightPaddle.boundingShape);
 		npc.push(stage.boundingShape);
+		npc.push(ball.boundingShape);
+		npc.push(wallOfJustice.boundingShape);
 		//console.log("Adding to elements: \n"+rightPaddle.toString());
 	}
 	
@@ -122,71 +158,53 @@
 			}
 		}
 		if(paddle.keysPressed.Right) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(speed,0))){
+			if(!paddle.boundingShape.preemptiveCollidesWith(npc , new Point(speed,0))){
 				dP.x += speed;
 			}
 		}
 		if(paddle.keysPressed.Up) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,-speed))){
+			if(!paddle.boundingShape.preemptiveCollidesWith(npc , new Point(0,-speed))){
 				dP.y -= speed;
 			}
 		}
 		if(paddle.keysPressed.Down) {
-			if(!paddle.boundingShape.preemptiveCollidesWith( npc , new Point(0,speed))){
+			if(!paddle.boundingShape.preemptiveCollidesWith(npc , new Point(0,speed))){
 				dP.y += speed;
 			}
 		}
 		
+		waggleBall();
+	}
+	
+	function waggleBall() {
+		var ball = elements["ball"],
+			player = elements["leftPaddle"],
+			npcPaddle = elements["rightPaddle"],
+			edge = elements["stage"],
+			paddles = [],
+			temp;
+			
+		paddles.push(player);
+		paddles.push(npcPaddle);
 
-		/*if (collision.status === "apart" || collision.status === "inside"){
-			//var dP = new Point(paddle.center.x,paddle.center.y);
-			if(paddle.keysPressed.Left){
-				dP.x -= speed;
-			} 
-			
-			if(paddle.keysPressed.Right){
-				dP.x += speed;
+		temp = ball.boundingShape.preemptiveCollidesWith([player], ball.velocity);
+		//console.log(temp + ball.boundingShape.center + player.boundingShape.center);
+		if(temp) {
+			console.log("PUSSY BADGER Inc.");
+			var collisionLine = new Line(ball.center, temp.center);
+			ball.velocity = new Point(collisionLine.startPoint.x - collisionLine.endPoint.x, collisionLine.startPoint.y - collisionLine.endPoint.y);
+		} else if((temp = ball.boundingShape.collidesWith(edge)).status === "colliding") {
+			if (temp.otherLine.name === BoundingRectangle.TOP || temp.otherLine.name === BoundingRectangle.BOTTOM) {
+				ball.velocity = new Point(ball.velocity.x, -1 * ball.velocity.y);
+			} else if (temp.otherLine.name === BoundingRectangle.LEFT) {
+				// DO SHITGIRL
+			} else {
+				// DO SHITBOY
 			}
-			
-			if(paddle.keysPressed.Up){
-				dP.y -= speed;
-			} 
-			
-			if(paddle.keysPressed.Down){
-				dP.y += speed;
-			}
-		} else if(collision.status === "colliding"){
-			var boom = "";
-			
-			for(var i = 0; i < collision.collisions.length; i++){
-				boom += collision.collisions[i].myLine + " ";
-			}
-			
-			if(paddle.keysPressed.Left){
-				if(boom.indexOf("LEFT") == -1){
-					dP.x -= speed;
-				}
-			}
-			
-			if(paddle.keysPressed.Right){
-				if(boom.indexOf("RIGHT") == -1){
-					dP.x += speed;
-				}
-			}
-			
-			if(paddle.keysPressed.Up){
-				if(boom.indexOf("TOP") == -1){
-					dP.y -= speed;
-				}
-			} 
-			
-			if(paddle.keysPressed.Down){
-				if(boom.indexOf("BOTTOM") == -1){
-					dP.y += speed;
-				}
-			}
-
-		}*/
+		}
+		console.log(ball.boundingShape.center + ball.velocity.x + ball.velocity.y + " I never liked your spinach puffs");
+		//TODO: Rock the cock
+		//ball.center.x += ball.velocity.x
 	}
 	
 	function draw() {

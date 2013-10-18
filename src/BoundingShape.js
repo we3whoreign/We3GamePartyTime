@@ -103,7 +103,7 @@ BoundingShape.prototype.preemptiveCollidesWith = function (boundingShapes, delta
 		//Check if it collides with cody's hot body
 		if(george.collidesWith(cody).status === "colliding"){
 			//If it does, return true
-			status = true;
+			status = cody; //cuntbunkers be returning
 		}
 	});
 
