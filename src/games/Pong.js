@@ -6,7 +6,7 @@
 	var	context = canvas.getContext('2d'),
 		fps = 120,
 		elements = [],
-		npc = [];
+		collidables = [];
 	
 	function init() {
 		var leftPaddle = new Entity(),
@@ -132,16 +132,15 @@
 		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
 		elements["ball"] = ball;
-		elements["wallOfJuster"] = wallOfJustice;
+		elements["wallOfJustice"] = wallOfJustice;
 		elements["stage"] = stage; 
 		
-		// NPC List of collidable objects
-		npc.push(rightPaddle.boundingShape);
-		npc.push(stage.boundingShape);
-		npc.push(ball.boundingShape);
-		npc.push(wallOfJustice.boundingShape);
-		//console.log("Adding to elements: \n"+rightPaddle.toString());
+		//List of collidable objects
+		rightPaddle.collidables = leftPaddle.collidables = [stage.boundingShape, wallOfJustice.boundingShape, ball.boundingShape];
+		ball.collidables = [stage.boundingShape];
+		ball.velocity = new Point(-1,0);
 	}
+	
 	
 	function update(){
 		var paddle = elements["leftPaddle"],
@@ -149,7 +148,8 @@
 			speed = 3;
 			//collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
 
-		var dP = paddle.center;
+		var dP = paddle.center,
+			npc = paddle.collidables;
 
 					
 		if(paddle.keysPressed.Left) {
@@ -186,10 +186,23 @@
 			
 		paddles.push(player);
 		paddles.push(npcPaddle);
-
-		temp = ball.boundingShape.preemptiveCollidesWith([player], ball.velocity);
+		
+		
+		temp = ball.boundingShape.preemptiveCollidesWith([player.boundingShape,edge.boundingShape, npcPaddle.boundingShape],ball.velocity);
+		
+		if(!temp){
+			console.log("FRICKIMINGLES");
+			ball.center = ball.center.add(ball.velocity);
+		}else{
+			console.log("PICKADINGLES?");
+			ball.velocity.x = -1 * ball.velocity.x;
+			ball.velocity.y = (ball.center.y > temp.center.y) ? -1 : 1;
+			//ball.velocity = new Point(ball.velocity.x*-1,0);
+		}
+		
+		temp = ball.boundingShape.preemptiveCollidesWith([player.boundingShape], ball.velocity);
 		//console.log(temp + ball.boundingShape.center + player.boundingShape.center);
-		if(temp) {
+		/* if(temp) {
 			console.log("PUSSY BADGER Inc.");
 			var collisionLine = new Line(ball.center, temp.center);
 			ball.velocity = new Point(collisionLine.startPoint.x - collisionLine.endPoint.x, collisionLine.startPoint.y - collisionLine.endPoint.y);
@@ -201,8 +214,8 @@
 			} else {
 				// DO SHITBOY
 			}
-		}
-		console.log(ball.boundingShape.center + ball.velocity.x + ball.velocity.y + " I never liked your spinach puffs");
+		} */
+		//console.log(ball.boundingShape.center + ball.velocity.x + ball.velocity.y + " I never liked your spinach puffs");
 		//TODO: Rock the cock
 		//ball.center.x += ball.velocity.x
 	}
