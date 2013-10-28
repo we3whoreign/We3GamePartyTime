@@ -1,6 +1,11 @@
 var Entity = function (shape) {
 	//boundingShape is the prototype of some polygon
 	this.shape = shape;
+	
+	// Declare private member variables before use
+	this._boundingShape = null;
+	this._center = null;
+	this._collidables = null;
 };
 
 Entity.prototype.octogonalDirections = {
@@ -19,8 +24,15 @@ Entity.prototype._createBoundingShape = function () {
 };
 
 Entity.prototype.toString = function () {
-	return this.boundingShape.toString();
+	if(this._boundingShape) {
+		return this._boundingShape.toString();
+	} else {
+		return "";
+	}
 };
+
+// Would be nice to have collidable groups
+Entity.prototype.collidables = [];
 
 Object.defineProperty(Entity.prototype, "boundingShape", {
 	get: function() { 
@@ -38,14 +50,14 @@ Object.defineProperty(Entity.prototype, "boundingShape", {
 Object.defineProperty(Entity.prototype, "center", {
 	get: function() {
 		if(Boolean(this._boundingShape)){
-			return this.boundingShape.center;
+			return this._boundingShape.center;
 		} else {
 			return this._center;
 		}
 	},
 	set: function(center) {
 		if (Boolean(this._boundingShape)){
-			this.boundingShape.center.moveTo(center);
+			this._boundingShape.center.moveTo(center);
 		} else {
 			this._center = center;
 		}
@@ -53,3 +65,4 @@ Object.defineProperty(Entity.prototype, "center", {
 });
 
 Entity.prototype.visible = false;
+Entity.prototype.shape = null;
