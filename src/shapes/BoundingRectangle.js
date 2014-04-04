@@ -39,6 +39,15 @@ BoundingRectangle.prototype.makeLine = function(p1, p2, name){
 	return new Line(new Point(p1.x, p1.y), new Point(p2.x, p2.y), name);
 }
 
+BoundingRectangle.prototype.isPointInside = function(point) {
+	var xMin = this.center.x - this.width/2;
+	var xMax = this.center.x + this.width/2;
+	var yMin = this.center.y - this.height/2;
+	var yMax = this.center.y + this.height/2;
+	
+	return (xMin <= point.x) && (xMax >= point.x) && (yMin <= point.y) && (yMax >= point.y);
+}
+
 BoundingRectangle.prototype.draw = function (context, color) {
 	if(!Boolean(context)){
 		throw "BoundingRectangle.draw requires a context to be passed in";

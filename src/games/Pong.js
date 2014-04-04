@@ -1,29 +1,51 @@
 ( function () {
+
+	// Game States
+	var GameState = {
+		Menu: 1,
+		Play: 2,
+		Pause: 3,
+		PlayAgain: 4
+	};
+	
 	// Canvas setup
 	var canvas = document.getElementById("gameCanvas");
-	canvas.width = 800;
-	canvas.height = 600;
+	canvas.width = Settings.canvasWidth;
+	canvas.height = Settings.canvasHeight;
 	var	context = canvas.getContext('2d'),
-		fps = 120,
+		fps = Settings.fps,
 		elements = [],
-		collidables = [];
+		prinScore = 0,
+		blazeScore = 0,
+		gameState = GameState.Play,
+		click = false,
+		buttons = [];
 	
 	function init() {
+		playinit();
+		
+		// Menu must go last, because it's the first gamestate
+		menuinit();
+	}
+	
+	function playinit() {
 		var leftPaddle = new Entity(),
 			rightPaddle = new Entity(),
 			stage = new Entity(),
-			ball = new Entity();
-			wallOfJustice = new Entity();
+			ball = new Entity(),
+			wallOfJustice = new Entity(),
+			prinScoreText = function () {},
+			blazeScoreText = function () {};
 		
-		ball.velocity = new Point(-1,0);
+		ball.velocity = new Point(Settings.ballSpeed,0);
 		
 	
 		leftPaddle._createBoundingShape = function () {
-			return new BoundingRectangle(30 /* height */,60 /* width */, new Point(40, canvas.height/2 - 15));
+			return new BoundingRectangle(60 /* height */,30 /* width */, new Point(40, canvas.height/2 - 15));
 		};
 		
 		rightPaddle._createBoundingShape = function () {
-			return new BoundingRectangle(30 /* height */,60 /* width */, new Point(canvas.width - 40, canvas.height/2  - 15));
+			return new BoundingRectangle(60 /* height */,30 /* width */, new Point(canvas.width - 40, canvas.height/2  - 15));
 		};
 		
 		stage._createBoundingShape = function () {
@@ -72,7 +94,19 @@
 				
 			context.fillStyle = '#ffffff';
 			context.fillRect(topLeftX, topLeftY, bs.width, bs.height);
-		}
+		};
+		
+		prinScoreText.draw = function() {
+			context.strokeStyle = "#ffffff";
+			context.strokeText(prinScore, canvas.width - 25, 25);
+		};
+		
+		blazeScoreText.draw = function() {
+			context.strokeStyle= "#ffffff";
+			context.strokeText(blazeScore, 25, 25);
+		};
+		
+		
 		
 		leftPaddle.image = new Image();
 		leftPaddle.image.src = "../lib/images/leftpaddle.png";
@@ -133,38 +167,68 @@
 		elements["stage"] = stage;
 		elements["ball"] = ball;
 		elements["wall"] = wallOfJustice;
+		elements["blazeScore"] = blazeScoreText;
+		elements["prinScore"] = prinScoreText;
+		
+		this._playElements = elements;
+		// elements = [];
 	}
 	
+	function menuinit() {
 	
-	function update(){
+	}
+	
+	function menu() {
+		//TODO: Add menu buttons
+		canvas.onmousedown = function(e) {
+			click = true;
+		};
+		
+		canvas.onmouseup = function(e) {
+			click = false;
+		};
+		
+		canvas.onmousemove = function(e) {
+			var x = e.clientX;
+			var y = e.clientY;
+			
+			x -= canvas.offsetLeft;
+			y -= canvas.offsetTop;
+			
+			for(i in buttons) {
+				buttons[i].updateMouseStatus(x,y,click);
+			}
+		};
+	}
+	
+	function play() {
 		var paddle = elements["leftPaddle"],
 			prinny = elements["rightPaddle"],
             stage = elements["stage"],
 			ball = elements["ball"],
 			wall = elements["wall"],
-			npc = [stage.boundingShape, ball.boundingShape, wall.boundingShape],
-			speed = 3;            
+			npc = [stage.boundingShape, ball.boundingShape, wall.boundingShape];        
          
 		var dP = new Point(0,0);
 					
 		if(paddle.keysPressed.Left) {
-            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(-speed, 0 ))) {
-                dP.x -= speed;
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(-Settings.paddleSpeed, 0 ))) {
+                dP.x -= Settings.paddleSpeed;
             }
 		}
 		if(paddle.keysPressed.Right) {
-            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(speed, 0 ))) {
-                dP.x += speed;
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point(Settings.paddleSpeed, 0 ))) {
+                dP.x += Settings.paddleSpeed;
             }
 		}
 		if(paddle.keysPressed.Up) {
-            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, -speed ))) {
-                dP.y -= speed;
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, -Settings.paddleSpeed ))) {
+                dP.y -= Settings.paddleSpeed;
             }
 		}
 		if(paddle.keysPressed.Down) {
-            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, speed ))) {
-                dP.y += speed;
+            if (!paddle.boundingShape.preemptiveCollidesWith( npc, new Point( 0, Settings.paddleSpeed ))) {
+                dP.y += Settings.paddleSpeed;
             }
 		}
         
@@ -204,29 +268,68 @@
 				
 			if (preemptiveCollisions.object == edge.boundingShape) {
 				lines = edge.boundingShape.lines;
-				if (findLineInCollisions(collisions, lines.TOP)) {
-					ball.velocity.y = 1;
-				} else if (findLineInCollisions(collisions, lines.BOTTOM)) {
-					ball.velocity.y = -1;
+				if (findLineInCollisions(collisions, lines.TOP) || (findLineInCollisions(collisions, lines.BOTTOM))) {
+					ball.velocity.y = -ball.velocity.y;
 				}
 				
 				if (findLineInCollisions(collisions, lines.LEFT)) {
-					ball.velocity.x = 1;
+					scoreForPrin();
+					return;
 				} else if (findLineInCollisions(collisions, lines.RIGHT)) {
-					ball.velocity.x = -1;
+					scoreForBlaze();
+					return;
 				}
 			} else {
 				lines = preemptiveCollisions.object.lines;
 				if (findLineInCollisions(collisions, lines.RIGHT)) {
-					ball.velocity.x = 1;
+					ball.velocity.x = Settings.ballSpeed;
 				} else if (findLineInCollisions(collisions, lines.LEFT)) {
-					ball.velocity.x = -1;
+					ball.velocity.x = -Settings.ballSpeed;
 				}
-				ball.velocity.y = (ball.center.y > preemptiveCollisions.object.center.y) ? 1 : -1;
+				
+				ratio = (ball.center.y - preemptiveCollisions.object.center.y)/(preemptiveCollisions.object.height/2);
+				ball.velocity.y = ratio * Settings.ballSpeed;
 			}
 		}
 	}
 	
+	function scoreForPrin(){
+		prinScore++;
+		resetBall(-Settings.ballSpeed);
+	}
+	
+	function scoreForBlaze(){
+		blazeScore++;	
+		resetBall(Settings.ballSpeed);			
+	}
+	
+	function resetBall(direction) {
+		stage = elements["stage"];
+		ball = elements["ball"];
+		
+		ball.center = new Point(stage.center.x, stage.center.y);
+		ball.velocity = new Point(direction,0);
+	}
+	
+	function gameLoop() {
+		update();
+		draw();
+	}
+	
+	function update(){
+		switch(gameState) {
+			case GameState.Menu:
+				menu();
+				break;
+			case GameState.Play:
+				play();
+				break;
+			default:
+				wtfboom();
+				break; //no, really
+		}
+	}
+		
 	function draw() {
 		// repaint the canvas to clear it
 		context.fillStyle = "#000000";
@@ -235,11 +338,6 @@
 		for(i in elements){
 			elements[i].draw();
 		}
-	}
-	
-	function gameLoop() {
-		update();
-		draw();
 	}
 	
 	init();
