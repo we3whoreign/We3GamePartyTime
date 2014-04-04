@@ -129,14 +129,10 @@
 		});
 		
 		elements["leftPaddle"] = leftPaddle;
-		//console.log("Adding to elements: \n"+leftPaddle.toString());
 		elements["rightPaddle"] = rightPaddle;
 		elements["stage"] = stage;
-        
-		// NPC List of collidable objects
-		npc.push(rightPaddle.boundingShape);
-		npc.push(stage.boundingShape);
-		//console.log("Adding to elements: \n"+rightPaddle.toString());
+		elements["ball"] = ball;
+		elements["wall"] = wallOfJustice;
 	}
 	
 	
@@ -144,23 +140,10 @@
 		var paddle = elements["leftPaddle"],
 			prinny = elements["rightPaddle"],
             stage = elements["stage"],
-			speed = 3;
-			//collision = paddle.boundingShape.collidesWith(prinny.boundingShape);
-            
-         
-         // Move the prinny first
-         if(!prinny.speed) {
-            prinny.speed = 1;
-         }
-         
-         if(prinny.boundingShape.preemptiveCollidesWith( [stage.boundingShape, paddle.boundingShape], new Point(prinny.speed, 0))) {
-            prinny.speed = -1 * prinny.speed;
-            if(prinny.boundingShape.preemptiveCollidesWith( [stage.boundingShape, paddle.boundingShape], new Point(prinny.speed, 0))) {
-                prinny.speed = 0;
-            }
-         }
-
-         prinny.center.moveBy(prinny.speed, 0);
+			ball = elements["ball"],
+			wall = elements["wall"],
+			npc = [stage.boundingShape, ball.boundingShape, wall.boundingShape],
+			speed = 3;            
          
 		var dP = new Point(0,0);
 					
@@ -190,52 +173,61 @@
 		waggleBall();
 	}
 	
+	function findLineInCollisions(collisions, line) {
+			for(var i = 0; i < collisions.length; i++) {
+				var collision = collisions[i];
+				if(collision.otherLine === line.name){
+					return true;
+				}
+			}
+			
+			return false;
+	}
+	
 	function waggleBall() {
 		var ball = elements["ball"],
 			player = elements["leftPaddle"],
 			npcPaddle = elements["rightPaddle"],
 			edge = elements["stage"],
-			paddles = [],
-			temp;
-			
-		paddles.push(player);
-		paddles.push(npcPaddle);
+			preemptiveCollision;
 		
+		preemptiveCollisions = ball.boundingShape.preemptiveCollidesWith([player.boundingShape,edge.boundingShape, npcPaddle.boundingShape],ball.velocity);
 		
-		temp = ball.boundingShape.preemptiveCollidesWith([player.boundingShape,edge.boundingShape, npcPaddle.boundingShape],ball.velocity);
-		
-		if(!temp){
-			console.log("FRICKIMINGLES");
-			ball.center = ball.center.add(ball.velocity);
+		if(!preemptiveCollisions){
+			// If the ball is not colliding, go ahead and move it by the velocity
+			ball.center.moveByVector(ball.velocity);
 		}else{
-			console.log("PICKADINGLES?");
-			ball.velocity.x = -1 * ball.velocity.x;
-			ball.velocity.y = (ball.center.y > temp.center.y) ? -1 : 1;
-			//ball.velocity = new Point(ball.velocity.x*-1,0);
-		}
-		
-		temp = ball.boundingShape.preemptiveCollidesWith([player.boundingShape], ball.velocity);
-		//console.log(temp + ball.boundingShape.center + player.boundingShape.center);
-		/* if(temp) {
-			console.log("PUSSY BADGER Inc.");
-			var collisionLine = new Line(ball.center, temp.center);
-			ball.velocity = new Point(collisionLine.startPoint.x - collisionLine.endPoint.x, collisionLine.startPoint.y - collisionLine.endPoint.y);
-		} else if((temp = ball.boundingShape.collidesWith(edge)).status === "colliding") {
-			if (temp.otherLine.name === BoundingRectangle.TOP || temp.otherLine.name === BoundingRectangle.BOTTOM) {
-				ball.velocity = new Point(ball.velocity.x, -1 * ball.velocity.y);
-			} else if (temp.otherLine.name === BoundingRectangle.LEFT) {
-				// DO SHITGIRL
+			preemptiveCollisions = preemptiveCollisions[0];
+			
+			var collisions = preemptiveCollisions.collisions,
+				lines = [];
+				
+			if (preemptiveCollisions.object == edge.boundingShape) {
+				lines = edge.boundingShape.lines;
+				if (findLineInCollisions(collisions, lines.TOP)) {
+					ball.velocity.y = 1;
+				} else if (findLineInCollisions(collisions, lines.BOTTOM)) {
+					ball.velocity.y = -1;
+				}
+				
+				if (findLineInCollisions(collisions, lines.LEFT)) {
+					ball.velocity.x = 1;
+				} else if (findLineInCollisions(collisions, lines.RIGHT)) {
+					ball.velocity.x = -1;
+				}
 			} else {
-				// DO SHITBOY
+				lines = preemptiveCollisions.object.lines;
+				if (findLineInCollisions(collisions, lines.RIGHT)) {
+					ball.velocity.x = 1;
+				} else if (findLineInCollisions(collisions, lines.LEFT)) {
+					ball.velocity.x = -1;
+				}
+				ball.velocity.y = (ball.center.y > preemptiveCollisions.object.center.y) ? 1 : -1;
 			}
-		} */
-		//console.log(ball.boundingShape.center + ball.velocity.x + ball.velocity.y + " I never liked your spinach puffs");
-		//TODO: Rock the cock
-		//ball.center.x += ball.velocity.x
+		}
 	}
 	
 	function draw() {
-		//var liney = new Line(elements["leftPaddle"].center, elements["rightPaddle"].center);
 		// repaint the canvas to clear it
 		context.fillStyle = "#000000";
 		context.fillRect(0,0,canvas.width, canvas.height);
