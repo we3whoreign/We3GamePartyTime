@@ -68,6 +68,7 @@ BoundingShape.prototype.collidesWith = function (boundingShape2){
 	
 	if(god.length > 0){
 		return {
+		object: boundingShape2,
 		status: "colliding",
 		collisions: god
 		};
@@ -87,7 +88,7 @@ BoundingShape.prototype.collidesWith = function (boundingShape2){
 	}
 	
 	if ( isInside ){
-		return { status: "inside" };
+		return { status: "inside", object: boundingShape2 };
 	}
 	
 	return { status: "apart"};
@@ -96,19 +97,21 @@ BoundingShape.prototype.collidesWith = function (boundingShape2){
 BoundingShape.prototype.preemptiveCollidesWith = function (boundingShapes, delta){
 	// Create clone of shape which accounts for shapes next movement
 	var george = this.newClone(new Point(this.center.x+delta.x, this.center.y+delta.y)),
-	status = false;
+		status = false,
+		result = null;
 	
 	// Loop through given list
 	boundingShapes.forEach(function (cody) {
 		//Check if it collides with cody's hot body
-		if(george.collidesWith(cody).status === "colliding"){
+		result = george.collidesWith(cody);
+		if(result.status === "colliding"){
 			// If it does, make the status cody
 			
 			// cuntbunkers be returning
 			if(!status) {
-				status = [cody];
+				status = [result];
 			} else {
-				status.push(cody);
+				status.push(result);
 			}
 		}
 	});
